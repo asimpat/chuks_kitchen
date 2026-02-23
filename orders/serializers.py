@@ -25,8 +25,7 @@ class PlaceOrderSerializer(serializers.Serializer):
         total = 0
         order_items_to_create = []
 
-        # Step 1: Validate ALL items before creating anything
-        # We don't want to create a half-order if one item fails
+      # Validate ALL items
         for item_data in items_data:
             try:
                 food = FoodItem.objects.get(pk=item_data['food_item_id'])
@@ -45,10 +44,10 @@ class PlaceOrderSerializer(serializers.Serializer):
             order_items_to_create.append({
                 'food': food,
                 'quantity': item_data['quantity'],
-                'unit_price': food.price  # snapshot the current price
+                'unit_price': food.price 
             })
 
-        # Step 2: Create the order
+        # Create the order
         order = Order.objects.create(
             customer=customer,
             total_price=total,
@@ -56,7 +55,7 @@ class PlaceOrderSerializer(serializers.Serializer):
             note=validated_data.get('note', '')
         )
 
-        # Step 3: Create each order item
+        # Create each order item
         for item in order_items_to_create:
             OrderItem.objects.create(
                 order=order,
@@ -69,7 +68,6 @@ class PlaceOrderSerializer(serializers.Serializer):
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    """Used when showing order details"""
     food_name = serializers.CharField(source='food_item.name', read_only=True)
     subtotal = serializers.SerializerMethodField()
 
@@ -82,10 +80,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    """Full order with all its items — used in list and detail views"""
     items = OrderItemSerializer(many=True, read_only=True)
     customer_email = serializers.CharField(
-        source='customer.email', read_only=True)
+        source='user.email', read_only=True)
 
     class Meta:
         model = Order
@@ -95,7 +92,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'status',
             'total_price',
             'delivery_address',
-            'note',
             'items',
             'created_at',
             'updated_at'
@@ -103,5 +99,4 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class UpdateOrderStatusSerializer(serializers.Serializer):
-    """Admin uses this to update order status"""
     status = serializers.ChoiceField(choices=Order.STATUS_CHOICES)
