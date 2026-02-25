@@ -11,8 +11,10 @@ class CustomTokenView(TokenObtainPairView):
    
 urlpatterns = [
     path('signup/', SignupView.as_view(), name='signup'),
-    path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
+    path('verify/', VerifyOTPView.as_view(), name='verify-otp'),
     path('login/', LoginView.as_view(), name='login'),
+
+    
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('resend-otp/', ResendOTPView.as_view(), name='resend-otp'),
 ]
