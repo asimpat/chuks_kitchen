@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from auths.permissions import IsCustomer, IsAdmin
-from .serializers import PlaceOrderSerializer, OrderSerializer, UpdateOrderStatusSerializer
+from .serializers import PlaceOrderSerializer, OrderSerializer, UpdateOrderStatusSerializer, UpdatePaymentStatusSerializer
 from .models import Order
 
 
@@ -104,12 +104,18 @@ class AdminUpdateOrderStatusView(APIView):
         if serializer.is_valid():
             new_status = serializer.validated_data['status']
 
-            # Prevent updating a completed or cancelled order
             if order.status in ['completed', 'cancelled']:
                 return Response({
                     "success": False,
                     "message": f"Cannot update a {order.status} order."
                 }, status=400)
+            
+            if new_status == 'confirmed' and order.payment_status != 'paid':
+                return Response({
+                    "success": False,
+                    "message": "Cannot confirm order. Payment has not been completed. Mark payment as 'paid' first."
+                }, status=400)
+
 
             order.status = new_status
             order.save()
@@ -119,3 +125,38 @@ class AdminUpdateOrderStatusView(APIView):
             })
 
         return Response({"success": False, "errors": serializer.errors}, status=400)
+
+
+class AdminUpdatePaymentStatusView(APIView):
+    permission_classes = [IsAdmin]
+
+    def patch(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            return Response({
+                "success": False,
+                "message": "Order not found"
+            }, status=404)
+
+        if order.status in ['cancelled', 'completed']:
+            return Response({
+                "success": False,
+                "message": f"Cannot update payment on a {order.status} order."
+            }, status=400)
+
+        serializer = UpdatePaymentStatusSerializer(data=request.data)
+        if serializer.is_valid():
+            order.payment_status = serializer.validated_data['payment_status']
+            order.save()
+            return Response({
+                "success": True,
+                "message": f"Payment status updated to '{order.payment_status}'",
+                "order_id": order.id,
+                "payment_status": order.payment_status
+            })
+
+        return Response({
+            "success": False,
+            "errors": serializer.errors
+        }, status=400)

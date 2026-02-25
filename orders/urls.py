@@ -5,7 +5,8 @@ from .views import (
     CustomerOrderDetailView,
     CustomerCancelOrderView,
     AdminOrderListView,
-    AdminUpdateOrderStatusView
+    AdminUpdateOrderStatusView, 
+    AdminUpdatePaymentStatusView
 )
 
 urlpatterns = [
@@ -19,4 +20,7 @@ urlpatterns = [
     path('admin/all/', AdminOrderListView.as_view(), name='admin-order-list'),
     path('admin/<int:pk>/status/', AdminUpdateOrderStatusView.as_view(),
          name='admin-update-status'),
+    path('admin/<int:pk>/payment-status/', AdminUpdatePaymentStatusView.as_view(),
+         name='admin-update-payment-status'),
+         
 ]

@@ -44,7 +44,7 @@ class PlaceOrderSerializer(serializers.Serializer):
             order_items_to_create.append({
                 'food': food,
                 'quantity': item_data['quantity'],
-                'unit_price': food.price 
+                'unit_price': food.price
             })
 
         # Create the order
@@ -52,7 +52,7 @@ class PlaceOrderSerializer(serializers.Serializer):
             customer=customer,
             total_price=total,
             delivery_address=validated_data.get('delivery_address', ''),
-            
+
         )
 
         # Create each order item
@@ -90,6 +90,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'id',
             'customer_email',
             'status',
+            'payment_status',
             'total_price',
             'delivery_address',
             'items',
@@ -100,3 +101,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class UpdateOrderStatusSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=Order.STATUS_CHOICES)
+
+
+class UpdatePaymentStatusSerializer(serializers.Serializer):
+    payment_status = serializers.ChoiceField(
+        choices=Order.PAYMENT_STATUS
+    )
