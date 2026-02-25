@@ -52,7 +52,7 @@ class PlaceOrderSerializer(serializers.Serializer):
             customer=customer,
             total_price=total,
             delivery_address=validated_data.get('delivery_address', ''),
-            note=validated_data.get('note', '')
+            
         )
 
         # Create each order item

@@ -13,6 +13,7 @@ class PlaceOrderView(APIView):
             data=request.data,
             context={'request': request}
         )
+        
         if serializer.is_valid():
             order = serializer.save()
             return Response({
@@ -20,7 +21,8 @@ class PlaceOrderView(APIView):
                 "message": "Order placed successfully! We'll confirm shortly.",
                 "order_id": order.id,
                 "total_price": str(order.total_price),
-                "status": order.status
+                "status": order.status,
+                "payment_status": order.payment_status
             }, status=201)
 
         return Response({"success": False, "errors": serializer.errors}, status=400)
